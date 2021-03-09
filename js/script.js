@@ -33,86 +33,87 @@ P.S. Здесь есть несколько вариантов решения з
 window.addEventListener("DOMContentLoaded", () => {
   const movieDB = {
     movies: [
-      "Логан" /*`${"https://images.app.goo.gl/UegTuVMVePjwszHP8"}`*/ ,
-      "Лига справедливости" /*`${"https://g.co/kgs/24pzPt"}`*/ ,
+      "Логан" /*`${"https://images.app.goo.gl/UegTuVMVePjwszHP8"}`*/,
+      "Лига справедливости" /*`${"https://g.co/kgs/24pzPt"}`*/,
       "Ла-ла лэнд",
       "Одержимость",
       "Скотт Пилигрим против...",
     ],
   };
-  const advRemove = document.querySelectorAll(".promo__adv img"),
-    promo__bg = document.querySelector(".promo__bg"),
-    promo__genre = promo__bg.querySelector(".promo__genre"),
-    btn = document.querySelector("button"),
-    ul = document.querySelector(".promo__interactive-list"),
-    inputs = document.querySelector(".adding__input"),
-    li = document.querySelectorAll(".promo__interactive-item"),
-    delFilm = document.querySelectorAll(".delete"),
-    checkFav = document.querySelector("[type=checkbox]");
 
-  advRemove.forEach((item) => {
-    item.remove();
-  });
-  promo__genre.textContent = "драмма";
-  promo__bg.style.backgroundImage = 'url("img/bg.jpg")';
+  const adv = document.querySelectorAll(".promo__adv img"),
+    poster = document.querySelector(".promo__bg"),
+    genre = poster.querySelector(".promo__genre"),
+    movieList = document.querySelector(".promo__interactive-list"),
+    addForm = document.querySelector("form.add"),
+    addInput = addForm.querySelector(".adding__input"),
+    checkbox = addForm.querySelector('[type="checkbox"]');
 
-  let oldListItem = document.querySelectorAll(".promo__interactive-item");
-  let oldUl = document.querySelector(".promo__interactive-list");
+  addForm.addEventListener("submit", (event) => {
+    event.preventDefault();
 
-  oldUl.innerHTML = "";
-  movieDB.movies.sort();
-
-  let newFilm;
-  che();
-  btn.addEventListener("click", add);
-  btn.addEventListener("click", ulReset);
-  btn.addEventListener("click", che);
-  del();
-
-  function del() {
-    ul.addEventListener("click", (e) => {
-      li.forEach((item) => {
-        if (e.target.className === "delete") {
-          console.log(ul.firstElementChild);
-          ul.removeChild(e.target.closest("li"));
-          movieDB.movies.pop();
-        }
-      });
-    });
-  }
-
-  function add(e) {
-    e.preventDefault();
-    newFilm = inputs.value;
-
+    let newFilm = addInput.value;
+    const favorit = checkbox.checked;
     if (newFilm) {
       if (newFilm.length > 21) {
-        newFilm = `${newFilm.substring(0, 21)} ...`;
+        newFilm = `${newFilm.slice(0, 22)} ...`;
       }
+
       movieDB.movies.push(newFilm);
-      movieDB.movies.sort();
-    } else {
-      alert("Пиши фильм");
+      sortArr(movieDB.movies);
+      createMovieList(movieDB.movies, movieList);
+
+      if (favorit) {
+        console.log("Добавляем любимый фильм");
+      }
     }
 
-    if (checkFav.checked) {
-      console.log("Добавляем любимый фильм");
-    }
-    document.forms[1].reset();
-  }
+    event.target.reset();
+  });
 
-  function che() {
-    oldUl.innerHTML += "";
-    movieDB.movies.forEach((item, i) => {
-      oldUl.innerHTML += `
+  const deleteAdv = (arg) => {
+    arg.forEach((item) => {
+      item.remove();
+    });
+  };
+
+  const makeChanges = () => {
+    genre.textContent = "драма";
+
+    poster.style.backgroundImage = 'url("img/bg.jpg")';
+  };
+
+  //Сортировка массива(списка)
+  const sortArr = (arr) => {
+    arr.sort();
+  };
+
+  // Формирование списка
+  // parent-блок который будет использовать массив фильмов
+  function createMovieList(films, parent) {
+    parent.innerHTML = "";
+    sortArr(films);
+
+    films.forEach((item, i) => {
+      parent.innerHTML += `
      <li class="promo__interactive-item">${i + 1} ${item}
           <div class="delete"></div>
       </li>
      `;
     });
+    document.querySelectorAll(".delete").forEach((btn, i) => {
+      btn.addEventListener("click", () => {
+        btn.parentElement.remove();
+        movieDB.movies.splice(i, 1);
+        createMovieList(films, parent);
+
+      });
+      
+    });
+    
   }
 
-  function ulReset() {
-    oldUl.innerHTML = "";
-  }
+  deleteAdv(adv);
+  makeChanges();
+  createMovieList(movieDB.movies, movieList);
 });
